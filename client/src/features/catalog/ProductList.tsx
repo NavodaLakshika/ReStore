@@ -8,12 +8,16 @@ interface Props {
 
 export default function ProductList({ products }: Props) {
   return (
-    <Grid display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={4}>
+    <Box 
+      display="grid" 
+      gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: 'repeat(4, 1fr)' }}
+      gap={4}
+    >
       {products.map((product) => (
-        <Grid key={product.id}>
+        <Box key={product.id}>
           <ProductCard product={product} />
-        </Grid>
+        </Box>
       ))}
-    </Grid>
+    </Box>
   );
 }

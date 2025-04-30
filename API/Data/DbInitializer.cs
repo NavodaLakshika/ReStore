@@ -19,7 +19,7 @@ namespace API.Data
          
                 new Products
                 {
-                    Name = "Angular Speedster Board 2000",
+                    Name = "Angular Board c2000",
                     Description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
                     Price = 20000,
                     PictureUrl = "/images/products/sb-ang1.png",
@@ -27,6 +27,7 @@ namespace API.Data
                     Type = "Boards",
                     QuantityInStock = 100
                 },
+                
                 new Products
                 {
                     Name = "Green Angular Board 3000",
