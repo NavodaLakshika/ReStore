@@ -1,49 +1,25 @@
-
-import { Product } from "../../app/models/product";
-
 import { useState, useEffect } from "react";
+import { Product } from "../../app/models/product";
 import ProductList from "./ProductList";
-
-
+import { agent } from "../../app/api/agent";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default function Catalog() {
     const [products, setProducts] = useState<Product[]>([]);
-    
-      useEffect(() => {
-        fetch('http://localhost:5000/api/products')
-          .then(response => response.json())
-          .then((data) => setProducts(data))
-          .catch((error) => {
-            console.log("Error fetching products: ", error);
-          });
-      }, []); // Only run once when component mounts
-    
-      
-    
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        agent.Catalog.list()
+            .then((products) => setProducts(products)) // Set products state with the fetched data
+            .catch((error) => console.log(error))      // Log error if any
+            .finally(() => setLoading(false));         // Set loading to false after fetch
+    }, []);
+
+    if (loading) return <LoadingComponent message="Loading Products..." />;
+
     return (
         <>
-            <ProductList products={products}/>
-          
-               
+            <ProductList products={products} />
         </>
     );
 }
-        
-     // <>
-         //<List>
-             // {products.map(product=>(
-                //  <ListItem key={product.name}>
-
-                 //   <ListItemAvatar>
-                  //      <Avatar src={product.pictureUrl}/>
-                 //   </ListItemAvatar>
-                 //   <ListItemText>
-                 ///       {product.name} - {product.price}
-                 //   </ListItemText>
-                //  </ListItem>
-             // ))}
-      //</List>
-
-     // <Button onClick={addProduct}>Add product</Button>
-      //</>
-    

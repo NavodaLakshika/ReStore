@@ -10,31 +10,32 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Product } from "../../app/models/product";
-import axios from "axios";
+import { agent } from "../../app/api/agent";
+import NotFound from "../../app/errors/NotFound";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default function ProductDetails() {
+
+
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get<Product>(`http://localhost:5000/api/Products/${id}`)
-      .then((response) => {
-        setProduct(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    setLoading(true); // don't forget to set loading state to true
+    agent.Catalog.details(parseInt(id!))
+      .then(response => setProduct(response))
+      .catch(error => console.log(error))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <Typography variant="h3">Loading...</Typography>;
-  if (!product) return <Typography variant="h3">Product not found</Typography>;
 
+
+
+
+
+   
+  if (!product) return <NotFound/>
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: "48px" }}>
       <div style={{ flex: "1 1 400px", minWidth: "300px" }}>
@@ -44,10 +45,10 @@ export default function ProductDetails() {
           style={{ width: "100%", height: "auto" }}
         />
       </div>
-      <div style={{ flex: "1 1 400px", minWidth: "300px" }}>
-        <Typography variant="h3">{product.name}</Typography>
-        <Divider sx={{ mb: 2 }} />
-        <Typography variant="h4" color="secondary">
+      <div style={{ flex: "700px", minWidth: "200px" }}>
+        <Typography variant="h4" style={{ fontWeight: 'bold' }}>{product.name}</Typography>
+        <Divider sx={{ mb: 1 }} />
+        <Typography variant="h4" color="secondary" style={{ fontWeight: 'bold' }}>
           ${(product.price / 1000).toFixed(2)}
         </Typography>
 

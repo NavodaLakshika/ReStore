@@ -17,7 +17,7 @@ interface Props {
 
 export default function ProductCard({ product }: Props) {
   return (
-    <Card sx={{ maxWidth: 345, borderRadius: 3, boxShadow: 5 }}>
+    <Card sx={{ maxWidth: 345, borderRadius: 3, boxShadow: 15 }}>
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: 'secondary.main' }}>
@@ -28,24 +28,24 @@ export default function ProductCard({ product }: Props) {
         titleTypographyProps={{
           fontWeight: 'bold',
           color: 'primary.main',
-          fontSize: '1.1rem',
+          fontSize: '1.0rem',
         }}
       />
       <CardMedia
-        sx={{ height: 200, backgroundSize: 'contain', bgcolor: 'grey.100' }}
+        sx={{ height: 120, backgroundSize: 'contain', bgcolor: 'grey.100' }}
         image={product.pictureUrl}
         title={product.name}
       />
       <CardContent>
-        <Typography gutterBottom color="secondary" variant="h5">
+        <Typography gutterBottom color="secondary" variant="h6" component="div"  style={{ fontWeight: 'bold' }}>
           ${(product.price / 1000).toFixed(2)}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary"style={{ fontWeight: 'bold' }}>
           {product.brand} / {product.type}
         </Typography>
       </CardContent>
-      <CardActions sx={{ justifyContent: 'center' }}>
-        <Button variant="contained" size="small" sx={{ borderRadius: 2 }}>
+      <CardActions sx={{ justifyContent: 'center', }}>
+        <Button variant="contained" size="small" sx={{ borderRadius: 2  }}>
           Add to Cart
         </Button>
         <Button
