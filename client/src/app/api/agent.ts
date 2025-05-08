@@ -6,6 +6,7 @@ const sleep = () => new Promise(resolve => setTimeout(resolve, 400));
 
 // Set base URL
 axios.defaults.baseURL = "http://localhost:5000/api/";
+axios.defaults.withCredentials = true; // Enable cookies for cross-origin requests
 
 // Extract response body
 const responseBody = (response: AxiosResponse) => response.data;
@@ -73,8 +74,19 @@ const TestErrors = {
   GetValidationError: () => requests.get('buggy/validation-error'),
 };
 
+const Basket = {
+  get: () => requests.get('basket'),
+ addItem: (productId: number, quantity = 1) =>
+  requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
+
+removeItem: (productId: number, quantity = 1) =>
+  requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
+
+}
+
 // ✅ Export agent with named export
 export const agent = {
   Catalog,
-  TestErrors
+  TestErrors,
+  Basket,
 };

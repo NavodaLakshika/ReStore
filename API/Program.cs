@@ -1,53 +1,46 @@
 using API.Middleware;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
-builder.Services.AddDbContext<API.Data.StoreContext>(options => 
+builder.Services.AddDbContext<API.Data.StoreContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
-builder.Services.AddCors();
+// ✅ Register a named CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .WithOrigins("http://localhost:3000");
+    });
+});
 
-// Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(Options =>
-
-{
-    Options.AddDefaultPolicy(
-        policy=>
-        {
-        policy.AllowAnyOrigin()
-        .AllowAnyMethod()
-        .AllowAnyHeader();
-        });
-});
-
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Middleware
 app.UseMiddleware<ExceptionMiddleware>();
 
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors(opt =>
-{
-   opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:3000"); 
-});
-
-app.UseCors();
+// ✅ Use CORS with the correct policy (only once)
+app.UseCors("MyCorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
-app.Run(); 
+app.Run();

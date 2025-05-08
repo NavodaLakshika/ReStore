@@ -1,6 +1,5 @@
 import {
   AppBar,
-  Switch,
   Toolbar,
   Typography,
   Box,
@@ -11,10 +10,11 @@ import {
   styled,
   useTheme
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useStoreContext } from "../api/context/StoreContext";
 
 interface Props {
   darkMode: boolean;
@@ -66,6 +66,8 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
 
 export default function Header({ darkMode, handleThemeChange }: Props) {
   const theme = useTheme();
+  const {basket} = useStoreContext();
+  const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0) 
 
   return (
     <AppBar
@@ -138,11 +140,11 @@ export default function Header({ darkMode, handleThemeChange }: Props) {
 
         {/* Right Side Actions */}
         <Box display="flex" alignItems="center">
-          <IconButton 
+          <IconButton
             size="large" 
             color="inherit" 
-            component={NavLink}
-            to="/cart"
+            component={Link}
+            to="/basket"
             sx={{ 
               mr: 2,
               "&:hover": {
@@ -151,7 +153,7 @@ export default function Header({ darkMode, handleThemeChange }: Props) {
             }}
           >
             <Badge
-              badgeContent={4}
+              badgeContent={itemCount}
               color="secondary"
               sx={{
                 "& .MuiBadge-badge": {
