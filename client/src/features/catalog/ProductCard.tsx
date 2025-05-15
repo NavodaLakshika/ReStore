@@ -11,30 +11,18 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { Link } from "react-router-dom";
 import { Product } from "../../app/models/product";
-import { useState } from "react";
-import { agent } from "../../app/api/agent";
-import { useStoreContext } from "../../app/api/context/StoreContext";
-import { currencyFormat } from "../../app/util/util";
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
+import { addBasketItemAsync } from "../basket/basketSlice"; // ✅ FIXED: must import it!
 
 interface Props {
   product: Product;
 }
 
 export default function ProductCard({ product }: Props) {
-  const [loading, setLoading] = useState(false);
-  const { setBasket } = useStoreContext();
+  const { status } = useAppSelector((state) => state.basket);
+  const dispatch = useAppDispatch();
 
-  const handleAddItem = async (productId: number) => {
-    setLoading(true);
-    try {
-      const basket = await agent.Basket.addItem(productId);
-      setBasket(basket);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isLoading = status === "pendingAddItem" + product.id;
 
   return (
     <Card sx={{ maxWidth: 345, borderRadius: 3, boxShadow: 15 }}>
@@ -46,13 +34,12 @@ export default function ProductCard({ product }: Props) {
         }
         title={product.name}
         titleTypographyProps={{
-          fontWeight: "bold",
           color: "primary.main",
-          fontSize: "1.0rem",
+          fontSize: "0.8rem",
         }}
       />
       <CardMedia
-        sx={{ height: 120, backgroundSize: "contain", bgcolor: "grey.100" }}
+        sx={{ height: 140, backgroundSize: "contain", bgcolor: "white" }}
         image={product.pictureUrl}
         title={product.name}
       />
@@ -60,24 +47,21 @@ export default function ProductCard({ product }: Props) {
         <Typography
           gutterBottom
           color="secondary"
-          variant="h6"
-          component="div"
+          variant="subtitle1"
           sx={{ fontWeight: "bold" }}
         >
-          {currencyFormat(product.price)}
+          ${(product.price / 100).toFixed(2)}
         </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ fontWeight: "bold" }}
-        >
+        <Typography variant="body2" color="text.secondary">
           {product.brand} / {product.type}
         </Typography>
       </CardContent>
       <CardActions sx={{ justifyContent: "center" }}>
         <LoadingButton
-          loading={loading}
-          onClick={() => handleAddItem(product.id)}
+          loading={status.includes('pendingAddItem' + product.id)}
+          onClick={() =>
+            dispatch(addBasketItemAsync({ productId: product.id, quantity: 1 }))
+          }
           variant="contained"
           size="small"
           sx={{ borderRadius: 2 }}

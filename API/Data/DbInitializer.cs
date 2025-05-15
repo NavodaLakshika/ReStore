@@ -10,6 +10,7 @@ namespace API.Data
             // Check if there are any products in the DB, if yes, return
             if (await context.Products.AnyAsync()) 
             {
+                
                 return;   // Database is already seeded
             }
 
@@ -17,27 +18,7 @@ namespace API.Data
             {
                 
          
-                new Products
-                {
-                    Name = "Angular Board c2000",
-                    Description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
-                    Price = 20000,
-                    PictureUrl = "/images/products/sb-ang1.png",
-                    Brand = "Angular",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
                 
-                new Products
-                {
-                    Name = "Green Angular Board 3000",
-                    Description = "Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus.",
-                    Price = 15000,
-                    PictureUrl = "/images/products/sb-ang2.png",
-                    Brand = "Angular",
-                    Type = "Boards",
-                    QuantityInStock = 100
-                },
                 new Products
                 {
                     Name = "Core Board Speed Rush 3",
@@ -197,6 +178,27 @@ namespace API.Data
                     Brand = "Angular",
                     Type = "Boots",
                     QuantityInStock = 100
+                },
+
+                 new Products
+                {
+                    Name = "Navoda Lakshika",
+                    Description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
+                    Price = 2000000000,
+                    PictureUrl = "/images/products/sb-ang1.png",
+                    Brand = "puke",
+                    Type = "Hal Huththooooooooooo",
+                    QuantityInStock = 1000000000
+                },
+                new Products
+                {
+                    Name = "Navoda Lakshika Wijwsundara",
+                    Description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.",
+                    Price = 2000000000,
+                    PictureUrl = "/images/products/sb-ang1.png",
+                    Brand = "Kari Ponnaya",
+                    Type = "Huththooooooooooo",
+                    QuantityInStock = 1000000000
                 }
             };
             

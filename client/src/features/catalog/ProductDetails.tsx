@@ -9,57 +9,60 @@ import {
   CircularProgress,
   Box,
   TextField,
-  Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Product } from "../../app/models/product";
-import { agent } from "../../app/api/agent";
+import { LoadingButton } from "@mui/lab";
+
 import NotFound from "../../app/errors/NotFound";
-import { useStoreContext } from "../../app/api/context/StoreContext";
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
+import { addBasketItemAsync, removeBasketItemAsync } from "../basket/basketSlice";
+import { fetchProductAsync, productSlectors } from "./catalogSlice";
 
 export default function ProductDetails() {
-  const { basket, setBasket, removeItem } = useStoreContext();
+  
+  const dispatch = useAppDispatch();
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(false);
+  const product = useAppSelector((state) => productSlectors.selectById(state, Number(id))
+);
+
+  const { status: basketStatus, basket } = useAppSelector((state) => state.basket);
+  const { status: productStatus } = useAppSelector((state) => state.catalog);
+
   const [quantity, setQuantity] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const item = basket?.items.find(i => i.productId === product?.id);
+  const item = basket?.items.find((i) => i.productId === product?.id);
 
   useEffect(() => {
-    setLoading(true);
     if (item) setQuantity(item.quantity);
+    if (!product && id) dispatch(fetchProductAsync(parseInt(id)));
+  }, [id, item, dispatch, product]);
 
-    agent.Catalog.details(parseInt(id!))
-      .then(response => setProduct(response))
-      .catch(error => console.log(error))
-      .finally(() => setLoading(false));
-  }, [id, item]);
-
-  function handleUpdateCard() {
-    setSubmitting(true);
-    if (!item || quantity > item.quantity) {
-      const updateQuantity = item ? quantity - item.quantity : quantity;
-      agent.Basket.addItem(product?.id!, updateQuantity)
-        .then(basket => setBasket(basket))
-        .catch(error => console.log(error))
-        .finally(() => setSubmitting(false));
-    } else {
-      const updateQuantity = item.quantity - quantity;
-      agent.Basket.removeItem(product?.id!, updateQuantity)
-        .then(() => removeItem(product?.id!, updateQuantity))
-        .catch(error => console.log(error))
-        .finally(() => setSubmitting(false));
+  function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = parseInt(event.target.value);
+    if (!isNaN(value) && value >= 0) {
+      setQuantity(value);
     }
   }
 
-  if (loading)
+  function handleUpdateCart() {
+    if (!product) return;
+
+    if (!item || quantity > item.quantity) {
+      const updateQuantity = item ? quantity - item.quantity : quantity;
+      dispatch(addBasketItemAsync({ productId: product.id, quantity: updateQuantity }));
+    } else {
+      const updateQuantity = item.quantity - quantity;
+      dispatch(removeBasketItemAsync({ productId: product.id, quantity: updateQuantity }));
+    }
+  }
+
+  if (productStatus.includes("pending")) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" mt={10}>
         <CircularProgress />
       </Box>
     );
+  }
 
   if (!product) return <NotFound />;
 
@@ -74,11 +77,11 @@ export default function ProductDetails() {
       </div>
 
       <div style={{ flex: "700px", minWidth: "200px" }}>
-        <Typography variant="h4" style={{ fontWeight: "bold" }}>
+        <Typography variant="h4" fontWeight="bold">
           {product.name}
         </Typography>
         <Divider sx={{ mb: 1 }} />
-        <Typography variant="h4" color="secondary" style={{ fontWeight: "bold" }}>
+        <Typography variant="h4" color="secondary" fontWeight="bold">
           ${(product.price / 100).toFixed(2)}
         </Typography>
 
@@ -109,38 +112,31 @@ export default function ProductDetails() {
           </Table>
         </TableContainer>
 
-        <Box
-          display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}
-          gap={2}
-          mt={2}
-        >
+        <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2} mt={2}>
           <Box flex={1}>
             <TextField
               variant="outlined"
               type="number"
-              label="Quantity in stock"
+              label="Quantity"
               fullWidth
               value={quantity}
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (value >= 0) setQuantity(value);
-              }}
+              onChange={handleInputChange}
             />
           </Box>
 
           <Box flex={1}>
-            <Button
+            <LoadingButton
+              loading={basketStatus.includes("pending")}
               disabled={(item?.quantity === quantity) || (!item && quantity === 0)}
               sx={{ height: "56px" }}
               color="primary"
               variant="contained"
               size="large"
               fullWidth
-              onClick={handleUpdateCard}
+              onClick={handleUpdateCart}
             >
-              {submitting ? "Processing..." : item ? "Update Quantity" : "Add To Cart"}
-            </Button>
+              {item ? "Update Quantity" : "Add To Cart"}
+            </LoadingButton>
           </Box>
         </Box>
       </div>

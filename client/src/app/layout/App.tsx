@@ -1,4 +1,4 @@
-import { Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Container, createTheme, CssBaseline, ThemeProvider, GlobalStyles } from "@mui/material";
 import Header from "./Header";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
@@ -8,29 +8,26 @@ import { useStoreContext } from "../api/context/StoreContext";
 import { getCookie } from "../util/util";
 import { agent } from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
+import { useAppDispatch } from "../store/configureStore";
+import { setBasket } from "../../features/basket/basketSlice";
 
 function App() {
-  const {setBasket}= useStoreContext();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  const buyerId = getCookie("buyerId");
-  if (buyerId) {
-    agent.Basket.get()
-      .then((basket) => {
-        setBasket(basket);
-      })
-      .catch((error) => console.log(error))
-      .finally(() => setLoading(false));
-  }else{
-    setLoading(false);
-  }
-
-},[setBasket])
-
-
   const [darkMode, setDarkMode] = useState(false);
   const paletteType = darkMode ? "dark" : "light";
+
+  useEffect(() => {
+    const buyerId = getCookie("buyerId");
+    if (buyerId) {
+      agent.Basket.get()
+        .then((basket) => dispatch(setBasket(basket)))
+        .catch((error) => console.log(error))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [dispatch]);
 
   const theme = createTheme({
     palette: {
@@ -40,11 +37,11 @@ useEffect(() => {
         paper: paletteType === "light" ? "#ffffff" : "#1e1e1e",
       },
       primary: {
-        main: paletteType === "light" ? "#3f51b5" : "#90caf9", // Indigo / Light Blue
+        main: paletteType === "light" ? "#3f51b5" : "#90caf9",
         contrastText: "#ffffff",
       },
       secondary: {
-        main: paletteType === "light" ? "#ff4081" : "#f48fb1", // Pink tones
+        main: paletteType === "light" ? "#ff4081" : "#f48fb1",
         contrastText: "#ffffff",
       },
       text: {
@@ -71,6 +68,28 @@ useEffect(() => {
           },
         },
       },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: "none",
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 16,
+            boxShadow: paletteType === "light" ? "0 4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(255,255,255,0.05)",
+            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            '&:hover': {
+              transform: "translateY(-6px)",
+              boxShadow: paletteType === "light" ? "0 6px 30px rgba(0,0,0,0.15)" : "0 6px 30px rgba(255,255,255,0.1)",
+            },
+          },
+        },
+      },
     },
   });
 
@@ -82,8 +101,9 @@ useEffect(() => {
 
   return (
     <ThemeProvider theme={theme}>
-    <ToastContainer position="bottom-right" hideProgressBar theme="colored"/>
+      <GlobalStyles styles={{ body: { WebkitFontSmoothing: "antialiased" } }} />
       <CssBaseline />
+      <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
       <Header darkMode={darkMode} handleThemeChange={handleThemeChange} />
       <Container maxWidth="lg">
         <Outlet />

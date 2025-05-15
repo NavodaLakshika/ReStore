@@ -8,13 +8,16 @@ import {
   IconButton,
   Badge,
   styled,
-  useTheme
+  useTheme,
+  useMediaQuery,
+  Button
 } from "@mui/material";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { useStoreContext } from "../api/context/StoreContext";
+import { useAppSelector } from "../store/configureStore";
 
 interface Props {
   darkMode: boolean;
@@ -22,65 +25,61 @@ interface Props {
 }
 
 const midLinks = [
-  { title: "catalog", path: "/catalog" },
-  { title: "about", path: "/about" },
-  { title: "contact", path: "/contact" },
+  
+  { title: "Catalog", path: "/catalog" },
+  { title: "About", path: "/about" },
+  { title: "Contact", path: "/contact" },
 ];
 
 const rightLinks = [
-  { title: "login", path: "/login" },
-  { title: "register", path: "/register" },
+  { title: "Login", path: "/login", variant: "outlined" },
+  { title: "Register", path: "/register", variant: "contained" },
 ];
 
+// Styled NavLink for mid & right links
 const StyledNavLink = styled(NavLink)(({ theme }) => ({
-  color: theme.palette.common.white,
+  color: theme.palette.text.primary,
   textDecoration: "none",
-  typography: "h6",
   fontWeight: 500,
+  fontSize: "1rem",
   margin: theme.spacing(0, 1.5),
-  padding: theme.spacing(1, 0),
   position: "relative",
   transition: "all 0.3s ease",
-  
-  "&:hover": {
-    color: theme.palette.secondary.light,
-    transform: "translateY(-2px)",
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    height: "2px",
+    width: "0%",
+    backgroundColor: theme.palette.primary.light,
+    transition: "width 0.3s ease",
   },
-  
+  "&:hover::after": {
+    width: "100%",
+  },
   "&.active": {
-    color: theme.palette.secondary.main,
-    fontWeight: "bold",
+    color: theme.palette.primary.main,
+    fontWeight: 600,
     "&::after": {
-      content: '""',
-      position: "absolute",
-      bottom: 0,
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "60%",
-      height: "3px",
-      backgroundColor: theme.palette.secondary.main,
-      borderRadius: "3px"
-    }
-  }
+      width: "100%",
+    },
+  },
 }));
 
 export default function Header({ darkMode, handleThemeChange }: Props) {
   const theme = useTheme();
-  const {basket} = useStoreContext();
-  const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0) 
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { basket } = useAppSelector(state => state.basket);
+  const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        mb: 4,
-        background: darkMode 
-          ? theme.palette.background.default 
-          : "linear-gradient(135deg, rgba(35,44,175,1) 0%, rgba(100,187,245,1) 100%)",
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        background: "rgba(250, 250, 250, 0.98)",
+        backdropFilter: "blur(15px)",
       }}
     >
       <Toolbar
@@ -88,100 +87,92 @@ export default function Header({ darkMode, handleThemeChange }: Props) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          px: { xs: 2, sm: 4 },
-          maxWidth: "xl",
+          px: { xs: 2, md: 5 },
+          py: 1,
+          maxWidth: "1440px",
           mx: "auto",
-          width: "100%"
         }}
       >
-        {/* Logo + Theme Toggle */}
+        {/* Logo + Nav Links */}
         <Box display="flex" alignItems="center">
           <Typography
-            variant="h5"
+            variant="h4"
             component={NavLink}
             to="/"
             sx={{
-              color: "common.white",
-              fontWeight: 700,
-              letterSpacing: 1,
-              mr: 3,
+              fontWeight: 800,
+              fontFamily: "Poppins, sans-serif",
               textDecoration: "none",
-              "&:hover": {
-                color: "secondary.light"
-              }
+              background: "linear-gradient(90deg, #6366f1, #3b82f6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mr: 5,
+              transition: "transform 0.3s ease",
+              "&:hover": { transform: "scale(1.05)" }
             }}
           >
-            RE-STORE
+            RE<span style={{ fontWeight: 300 }}>STORE</span>
           </Typography>
-          
-          <IconButton 
-            onClick={handleThemeChange} 
-            color="inherit"
-            sx={{ ml: 1 }}
-          >
-            {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+
+          {!isMobile && (
+            <List sx={{ display: "flex", p: 0 }}>
+              {midLinks.map(({ title, path }) => (
+                <ListItem key={path} disablePadding>
+                  <StyledNavLink to={path}>{title}</StyledNavLink>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </Box>
 
-        {/* Middle Navigation */}
-        <List sx={{ display: { xs: "none", md: "flex" } }}>
-          {midLinks.map(({ title, path }) => (
-            <ListItem 
-              key={path} 
-              disablePadding
-              sx={{ width: "auto" }}
-            >
-              <StyledNavLink to={path}>
-                {title.toUpperCase()}
-              </StyledNavLink>
-            </ListItem>
-          ))}
-        </List>
+        {/* Right Side */}
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* Theme Switch */}
+          <IconButton onClick={handleThemeChange} color="default">
+            {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
 
-        {/* Right Side Actions */}
-        <Box display="flex" alignItems="center">
+          {/* Cart */}
           <IconButton
-            size="large" 
-            color="inherit" 
             component={Link}
             to="/basket"
-            sx={{ 
-              mr: 2,
-              "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.1)"
-              }
+            sx={{
+              color: theme.palette.text.primary,
+              "&:hover": { transform: "scale(1.1)" },
+              transition: "all 0.2s ease",
             }}
           >
-            <Badge
-              badgeContent={itemCount}
-              color="secondary"
-              sx={{
-                "& .MuiBadge-badge": {
-                  borderRadius: "50%",
-                  fontSize: "0.75rem",
-                  padding: "0 4px",
-                  minWidth: "20px",
-                  height: "20px",
-                },
-              }}
-            >
+            <Badge badgeContent={itemCount} color="secondary">
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
 
-          <List sx={{ display: { xs: "none", sm: "flex" } }}>
-            {rightLinks.map(({ title, path }) => (
-              <ListItem 
-                key={path} 
-                disablePadding
-                sx={{ width: "auto" }}
-              >
-                <StyledNavLink to={path}>
-                  {title.toUpperCase()}
-                </StyledNavLink>
-              </ListItem>
-            ))}
-          </List>
+          {/* Auth Links */}
+          {!isMobile && rightLinks.map(({ title, path, variant }) => (
+            <Button
+              key={title}
+              component={NavLink}
+              to={path}
+              variant={variant as "outlined" | "contained"}
+              sx={{
+                textTransform: "none",
+                borderRadius: "20px",
+                fontWeight: 500,
+                px: variant === "outlined" ? 2 : 3,
+                color: variant === "outlined" ? theme.palette.primary.main : "#fff",
+                borderColor: variant === "outlined" ? theme.palette.primary.main : undefined,
+                background: variant === "contained" ? "linear-gradient(90deg, #6366f1, #3b82f6)" : undefined,
+                boxShadow: variant === "contained" ? "0 4px 14px rgba(59, 130, 246, 0.3)" : undefined,
+                "&:hover": {
+                  background: variant === "contained" ? "#4f46e5" : theme.palette.primary.light,
+                  borderColor: theme.palette.primary.main,
+                  boxShadow: variant === "contained" ? "0 6px 20px rgba(59, 130, 246, 0.4)" : undefined,
+                },
+              }}
+            >
+              {title}
+            </Button>
+          ))}
         </Box>
       </Toolbar>
     </AppBar>
