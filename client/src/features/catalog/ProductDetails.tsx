@@ -9,21 +9,21 @@ import {
   CircularProgress,
   Box,
   TextField,
+  Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { LoadingButton } from "@mui/lab";
 
 import NotFound from "../../app/errors/NotFound";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { addBasketItemAsync, removeBasketItemAsync } from "../basket/basketSlice";
-import { fetchProductAsync, productSlectors } from "./catalogSlice";
+import { fetchProductAsync, productSelectors } from "./catalogSlice";
 
 export default function ProductDetails() {
   
   const dispatch = useAppDispatch();
   const { id } = useParams<{ id: string }>();
-  const product = useAppSelector((state) => productSlectors.selectById(state, Number(id))
+  const product = useAppSelector((state) => productSelectors.selectById(state, Number(id))
 );
 
   const { status: basketStatus, basket } = useAppSelector((state) => state.basket);
@@ -125,7 +125,7 @@ export default function ProductDetails() {
           </Box>
 
           <Box flex={1}>
-            <LoadingButton
+            <Button
               loading={basketStatus.includes("pending")}
               disabled={(item?.quantity === quantity) || (!item && quantity === 0)}
               sx={{ height: "56px" }}
@@ -136,7 +136,7 @@ export default function ProductDetails() {
               onClick={handleUpdateCart}
             >
               {item ? "Update Quantity" : "Add To Cart"}
-            </LoadingButton>
+            </Button>
           </Box>
         </Box>
       </div>

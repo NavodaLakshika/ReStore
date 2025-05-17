@@ -1,15 +1,16 @@
 using API.Middleware;
 using Microsoft.EntityFrameworkCore;
+using API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
-builder.Services.AddDbContext<API.Data.StoreContext>(options =>
+builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// ✅ Register a named CORS policy
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", policy =>
@@ -35,12 +36,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ✅ Use CORS with the correct policy (only once)
 app.UseCors("MyCorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// ✅ Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+    await context.Database.MigrateAsync(); // Apply migrations
+    await DbInitializer.Initialize(context); // Insert products
+}
 
 app.Run();

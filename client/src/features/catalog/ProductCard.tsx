@@ -57,7 +57,7 @@ export default function ProductCard({ product }: Props) {
         </Typography>
       </CardContent>
       <CardActions sx={{ justifyContent: "center" }}>
-        <LoadingButton
+        <Button
           loading={status.includes('pendingAddItem' + product.id)}
           onClick={() =>
             dispatch(addBasketItemAsync({ productId: product.id, quantity: 1 }))
@@ -67,7 +67,7 @@ export default function ProductCard({ product }: Props) {
           sx={{ borderRadius: 2 }}
         >
           Add to Cart
-        </LoadingButton>
+        </Button>
         <Button
           component={Link}
           to={`/catalog/${product.id}`}

@@ -1,28 +1,36 @@
 import { Box } from '@mui/material';
 import { Product } from '../../app/models/product';
 import ProductCard from './ProductCard';
+import { useAppSelector } from '../../app/store/configureStore';
+import ProductCardSkeleton from './ProductCardSkeleton'; // Optional, if you have a skeleton loader
 
 interface Props {
   products: Product[];
+  viewMode?: 'grid' | 'list';
 }
 
-export default function ProductList({ products }: Props) {
+export default function ProductList({ products, viewMode = 'grid' }: Props) {
+  const { productsLoaded } = useAppSelector(state => state.catalog);
+
   return (
-    <Box 
-    display="grid"
-    gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: 'repeat(5, 1fr)', xl: 'repeat(5, 1fr)' }}
-    gap={5}
-    sx={{
-      padding: "2rem",  // Add padding around the grid
-      maxWidth: "1200px",  // Limit width to create a more consistent layout
-      margin: "auto",  // Center the grid
-    }}
-  >
-    {products.map((product) => (
-      <Box key={product.id}>
-        <ProductCard product={product} />
-      </Box>
-    ))}
-  </Box>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: viewMode === 'list' ? 'column' : 'row',
+        flexWrap: 'wrap',
+        gap: 3,
+        justifyContent: 'flex-start',
+      }}
+    >
+      {!productsLoaded
+        ? Array.from({ length: 6 }).map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))
+        : products.map(product => (
+            <Box key={product.id} sx={{ flex: '1 1 300px', maxWidth: 300 }}>
+              <ProductCard product={product} />
+            </Box>
+          ))}
+    </Box>
   );
 }

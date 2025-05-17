@@ -106,7 +106,7 @@ export default function BasketPage() {
                 </TableCell>
 
                 <TableCell align="right">
-                  ${(item.price / 100 * item.quantity).toFixed(2)}
+                  ${(item.price / 100* item.quantity).toFixed(2)}
                 </TableCell>
 
                 <TableCell align="right">
