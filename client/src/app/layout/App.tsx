@@ -1,34 +1,53 @@
 import { Container, createTheme, CssBaseline, ThemeProvider, GlobalStyles } from "@mui/material";
 import Header from "./Header";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useStoreContext } from "../api/context/StoreContext";
-import { getCookie } from "../util/util";
-import { agent } from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
 import { useAppDispatch } from "../store/configureStore";
-import { setBasket } from "../../features/basket/basketSlice";
+import { fetchBasketAsync } from "../../features/basket/basketSlice";
+import { fetchCurrentUser } from "../../features/account/accountSlice";
 
 function App() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
   const paletteType = darkMode ? "dark" : "light";
 
-  useEffect(() => {
-    const buyerId = getCookie("buyerId");
-    if (buyerId) {
-      agent.Basket.get()
-        .then((basket) => dispatch(setBasket(basket)))
-        .catch((error) => console.log(error))
-        .finally(() => setLoading(false));
-    } else {
+  // Function to handle theme mode change
+  function handleThemeChange() {
+    setDarkMode((prevMode) => {
+      const newMode = !prevMode;
+      localStorage.setItem("darkMode", JSON.stringify(newMode)); // Persist dark mode preference
+      return newMode;
+    });
+  }
+
+  // Initialize the app
+  const initApp = useCallback(async () => {
+    try {
+      // Try fetching the current user first
+      await dispatch(fetchCurrentUser()).unwrap();
+      // After fetching user, try fetching the basket
+      await dispatch(fetchBasketAsync());
+    } catch (error) {
+      console.error("Error initializing app", error);
+    } finally {
       setLoading(false);
     }
   }, [dispatch]);
 
+  // Check and load dark mode preference from localStorage
+  useEffect(() => {
+    const storedDarkMode = localStorage.getItem("darkMode");
+    if (storedDarkMode) {
+      setDarkMode(JSON.parse(storedDarkMode)); // Load saved theme preference from localStorage
+    }
+    initApp(); // Call the initialization function
+  }, [initApp]);
+
+  // Create theme with Material UI
   const theme = createTheme({
     palette: {
       mode: paletteType,
@@ -93,10 +112,7 @@ function App() {
     },
   });
 
-  function handleThemeChange() {
-    setDarkMode(!darkMode);
-  }
-
+  // Loading screen while the app is initializing
   if (loading) return <LoadingComponent message="Initialising App..." />;
 
   return (

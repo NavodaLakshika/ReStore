@@ -9,6 +9,10 @@ import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
+
+import Register from "../../features/account/Register";
+import Login from "../../features/account/Login";
+import RequireAuth from "./RequireAuth";
 // 404 Page
 
 export const router = createBrowserRouter([
@@ -16,6 +20,9 @@ export const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      {element: <RequireAuth/>, children:[
+      { path: "checkout", element: <CheckoutPage /> },
+      ]},
       { path: "", element: <HomePage /> },
       { path: "catalog", element: <Catalog /> },
       { path: "catalog/:id", element: <ProductDetails /> },
@@ -24,7 +31,10 @@ export const router = createBrowserRouter([
       { path: "server-error", element: <ServerError /> },
       { path: "Not-found", element: <NotFound /> },
       { path: "basket", element: <BasketPage /> },
-      { path: "checkout", element: <CheckoutPage /> },
+      
+       
+        { path: "register", element: <Register /> },
+        { path: "login", element: <Login /> },
       { path: "*", element: <Navigate replace to='/not-found'/> } // Correctly referenced
     ],
   },

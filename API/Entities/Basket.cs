@@ -33,6 +33,11 @@ namespace API.Entities
             }
         
     }
+
+        internal void AddItem(Microsoft.CodeAnalysis.Project product, int quantity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
            
